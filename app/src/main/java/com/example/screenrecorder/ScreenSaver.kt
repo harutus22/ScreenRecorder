@@ -67,7 +67,6 @@ class ScreenSaver(mainActivity: Activity) {
 
     fun toggleScreenShare(context: Activity) {
         if (((context.toggle_button) as ToggleButton).isChecked) {
-            initRecorder(context)
             recordScreen(context)
         } else {
             mMediaRecorder.stop()
@@ -106,7 +105,7 @@ class ScreenSaver(mainActivity: Activity) {
         )
     }
 
-    private fun initRecorder(context: Activity) {
+    fun initRecorder(context: Activity) {
         try {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
@@ -145,7 +144,6 @@ class ScreenSaver(mainActivity: Activity) {
             e.printStackTrace()
         }
     }
-
 
     fun startRecording(resultCode: Int, data: Intent?, context: Activity) {
         mMediaProjectionCallback = MediaProjectionCallback(context.toggle_button)

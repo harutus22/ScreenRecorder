@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity() {
                 toggle_button.isChecked = false
                 return
             } else {
+                screenSaver.initRecorder(this)
                 screenSaver.startRecording(resultCode, data, this)
             }
         }
