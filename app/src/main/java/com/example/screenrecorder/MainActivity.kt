@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.display.DisplayManager
@@ -18,6 +19,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.View
@@ -27,6 +29,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.StringBuilder
 import java.text.SimpleDateFormat
@@ -111,6 +119,13 @@ class MainActivity : AppCompatActivity() {
             mMediaRecorder.reset()
             stopRecordScreen()
 
+            //make it visible in your gallery
+            CoroutineScope(Dispatchers.IO).launch {
+                val contentUri = Uri.fromFile(File(mVideoUri))
+                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                mediaScanIntent.data = contentUri
+                application.sendBroadcast(mediaScanIntent)
+            }
             videoView.setVideoURI(Uri.parse(mVideoUri))
             videoView.start()
         }
@@ -138,10 +153,9 @@ class MainActivity : AppCompatActivity() {
             mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
 
-
             mVideoUri =
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}" +
+                "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)}" +
                         "${StringBuilder("/Screen_Record").append(
                             SimpleDateFormat("dd-MM-yyyy-hh-mm-ss")
                                 .format(Date())
@@ -150,8 +164,8 @@ class MainActivity : AppCompatActivity() {
                 val resolver = contentResolver
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, UUID.randomUUID().toString())
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/ThermalCamera")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/Screen_Record")
                 }
                 resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
                     .toString()
